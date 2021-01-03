@@ -5,27 +5,33 @@ unbind -T prefix -a
 set -g escape-time 10
 set -g prefix C-a
 set -g base-index 1
+set -g pane-base-index 1
 set -g default-terminal "screen-256color"
 set -g allow-rename off
 
-# mouse
+set-option -g default-shell "/bin/bash"
+
+# COPY PASTE AND MOUSE
+# To copy, left click and drag to highlight text in yellow,
+# once you release left click yellow text will disappear and will automatically be available in clibboard
 set -g mouse on
 bind -n WheelUpPane if-shell -F -t = "#{mouse_any_flag}" "send-keys -M" "if -Ft= '#{pane_in_mode}' 'send-keys -M' 'select-pane -t=; copy-mode -e; send-keys -M'"
 bind -n WheelDownPane select-pane -t= \; send-keys -M
-set-option -g default-shell "/bin/bash"
+bind -n C-WheelUpPane select-pane -t= \; copy-mode -e \; send-keys -M
+bind -T copy-mode-vi    C-WheelUpPane   send-keys -X halfpage-up
+bind -T copy-mode-vi    C-WheelDownPane send-keys -X halfpage-down
+bind -T copy-mode-emacs C-WheelUpPane   send-keys -X halfpage-up
+bind -T copy-mode-emacs C-WheelDownPane send-keys -X halfpage-down
 
-# copy paste
+# # Use vim keybindings in copy mode
 setw -g mode-keys vi
-bind [ copy-mode
-bind -T copy-mode-vi v send-keys -X begin-selection
-bind -T copy-mode-vi y send-keys -X copy-selection
-bind -T copy-mode-vi V send-keys -X rectangle-toggle
-bind ] paste-buffer
-bind Space choose-buffer
+# Update default binding of `Enter` to also use copy-pipe
+unbind -T copy-mode-vi Enter
+bind-key -T copy-mode-vi Enter send-keys -X copy-pipe-and-cancel "pbcopy"
+bind-key -T copy-mode-vi MouseDragEnd1Pane send-keys -X copy-pipe-and-cancel "pbcopy"
 
 # pass C-a through to the terminal
 bind C-a send-prefix
-
 # pane management
 bind -n M-h select-pane -L
 bind -n M-j select-pane -D
@@ -42,10 +48,11 @@ bind -n M-J split-window -vc '#{pane_current_path}'
 bind -n M-K split-window -bvc '#{pane_current_path}'
 bind -n M-L split-window -hc '#{pane_current_path}'
 
-bind -n C-M-h swap-pane -t {left-of}
-bind -n C-M-j swap-pane -t {down-of}
-bind -n C-M-k swap-pane -t {up-of}
-bind -n C-M-l swap-pane -t {right-of}
+#bind -n C-M-h swap-pane -t {left-of}
+bind -n C-M-h swap-pane -t {left}
+bind -n C-M-j swap-pane -t {down}
+bind -n C-M-k swap-pane -t {up}
+bind -n C-M-l swap-pane -t {right}
 
 bind R source-file ~/.tmux.conf\; display "conf reloaded"
 bind w new-window
@@ -73,3 +80,5 @@ set -g status-left '#(hostname) #S '
 set -g status-left-length 20
 set -g status-right "%A, %B %d, %Y  %l:%M:%S %p"
 set -g status-style fg=colour15
+
+#
